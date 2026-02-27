@@ -1,23 +1,11 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
     background-color: #F8C8DC;
-}
-
-/* Position the "No" button absolutely within body */
-#noButton {
-    position: absolute;
-    margin-left: 150px;
-    transition: 0.5s;
-    /* Smooth movement */
-}
-
-#yesButton {
-    position: absolute;
-    margin-right: 150px;
-    /* Smooth movement */
+    margin: 0;
+    padding: 24px 12px;
 }
 
 .header_text {
@@ -27,33 +15,23 @@ body {
     color: white;
     text-align: center;
     margin-top: 20px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 .text {
     font-family: 'Nunito';
-    font-size: 25px;
+    font-size: 22px;
     font-weight: bold;
     color: white;
     text-align: center;
-    margin-top: 20px;
-    margin-bottom: 0px;
-}
-
-.buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-    margin-left: 20px;
-    /* optional: adds some space between the buttons */
+    margin-top: 12px;
+    margin-bottom: 0;
 }
 
 .btn {
     background-color: #FFB6C1;
     color: white;
-    padding: 15px 32px;
+    padding: 12px 24px;
     text-align: center;
     display: inline-block;
     font-size: 16px;
@@ -66,10 +44,74 @@ body {
 
 .btn:hover {
     background-color: #FAF9F6;
+    color: #d06f89;
 }
 
 .gif_container {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 14px;
+}
+
+.gif_container img {
+    max-width: 260px;
+    width: 100%;
+    height: auto;
+}
+
+.container {
+    width: 100%;
+    max-width: 560px;
+}
+
+.date_time_form {
+    margin-top: 18px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+}
+
+.label {
+    font-family: 'Nunito';
+    font-weight: bold;
+    color: white;
+}
+
+.input {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.sync_status {
+    margin: 4px 0 0;
+    min-height: 22px;
+    font-family: 'Nunito';
+    color: white;
+    font-size: 14px;
+}
+
+.selection_card {
+    margin-top: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+
+.selection_title {
+    margin: 0;
+    font-family: 'Nunito';
+    color: white;
+}
+
+.selection_text {
+    margin: 8px 0 0;
+    font-family: 'Nunito';
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
 }

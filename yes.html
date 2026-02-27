@@ -2,17 +2,155 @@
 <html lang="en">
     <head>
         <link rel="stylesheet" href="./yes_style.css">
-        
-    </head> 
+    </head>
     <body>
         <div class="container">
-            <div >
-                <h1 class = "header_text">Yeeeyyyy!!</h1>
+            <div>
+                <h1 class="header_text">Yeeeyyyy!!</h1>
+                <p class="text">Pick a date and time (Pakistan Standard Time - PKT).</p>
             </div>
+
             <div class="gif_container">
                 <img src="https://media0.giphy.com/media/T86i6yDyOYz7J6dPhf/giphy.gif" alt="Cute animated illustration">
             </div>
+
+            <form id="dateTimeForm" class="date_time_form">
+                <label class="label" for="datePicker">Select date (Monday to Sunday)</label>
+                <input class="input" type="date" id="datePicker" required>
+
+                <label class="label" for="timePicker">Select time (5 PM to 10 PM PKT)</label>
+                <input class="input" type="time" id="timePicker" min="17:00" max="22:00" step="3600" required>
+
+                <button class="btn" type="submit">Save date & time</button>
+                <p class="sync_status" id="syncStatus" aria-live="polite"></p>
+            </form>
+
+            <div class="selection_card" id="selectionCard" aria-live="polite">
+                <h2 class="selection_title">Selected date & time</h2>
+                <p class="selection_text" id="selectionText">No date/time selected yet.</p>
+            </div>
         </div>
-       
-    </body> 
+
+        <script>
+            const STORAGE_KEY = 'dateInviteSelection';
+            const TIMEZONE = 'Asia/Karachi';
+            const GOOGLE_SCRIPT_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+            const datePicker = document.getElementById('datePicker');
+            const timePicker = document.getElementById('timePicker');
+            const syncStatus = document.getElementById('syncStatus');
+
+            function getTodayInPKT() {
+                const now = new Date();
+                const formatter = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: TIMEZONE,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+                const parts = formatter.formatToParts(now);
+                const year = parts.find((part) => part.type === 'year').value;
+                const month = parts.find((part) => part.type === 'month').value;
+                const day = parts.find((part) => part.type === 'day').value;
+                return `${year}-${month}-${day}`;
+            }
+
+            function formatWeekday(dateString) {
+                const [year, month, day] = dateString.split('-').map(Number);
+                const utcDate = new Date(Date.UTC(year, month - 1, day));
+                return new Intl.DateTimeFormat('en-US', {
+                    weekday: 'long',
+                    timeZone: TIMEZONE
+                }).format(utcDate);
+            }
+
+            function renderSelection(date, time) {
+                const weekday = formatWeekday(date);
+                const text = `${weekday}, ${date} at ${time} PKT`;
+                document.getElementById('selectionText').textContent = text;
+            }
+
+            async function sendToGoogleSheet(payload) {
+                if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('PASTE_YOUR_GOOGLE')) {
+                    syncStatus.textContent = 'Saved on this browser. Add your Google Apps Script URL to also save centrally.';
+                    return;
+                }
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sheet sync failed.');
+                }
+
+                syncStatus.textContent = 'Saved to Google Sheet successfully.';
+            }
+
+            function loadSavedSelection() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) {
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(saved);
+                    if (data?.date && data?.time) {
+                        datePicker.value = data.date;
+                        timePicker.value = data.time;
+                        renderSelection(data.date, data.time);
+                    }
+                } catch (error) {
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+            }
+
+            const todayInPKT = getTodayInPKT();
+            datePicker.setAttribute('min', todayInPKT);
+
+            document.getElementById('dateTimeForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                syncStatus.textContent = '';
+
+                const date = datePicker.value;
+                const time = timePicker.value;
+
+                if (!date || !time) {
+                    return;
+                }
+
+                if (date < todayInPKT) {
+                    alert('Please choose today or a future date in PKT.');
+                    return;
+                }
+
+                if (time < '17:00' || time > '22:00') {
+                    alert('Please choose a time between 5:00 PM and 10:00 PM PKT.');
+                    return;
+                }
+
+                const payload = {
+                    date,
+                    time,
+                    timezone: TIMEZONE,
+                    submittedAt: new Date().toISOString()
+                };
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                renderSelection(date, time);
+
+                try {
+                    await sendToGoogleSheet(payload);
+                } catch (error) {
+                    syncStatus.textContent = 'Saved on this browser, but failed to sync to Google Sheet.';
+                }
+            });
+
+            loadSavedSelection();
+        </script>
+    </body>
 </html>
