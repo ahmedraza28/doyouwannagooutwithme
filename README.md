@@ -2,35 +2,19 @@
 
 A website to invite your lover for a date 🥰
 
-## Google Sheet connection (your sheet is pre-filled)
+## Save selected date/time to Google Sheets
 
-Your sheet URL is already wired into `yes.html`:
+The `yes.html` page now stores the selected date/time in the browser and can also send it to Google Sheets.
 
-- https://docs.google.com/spreadsheets/d/1LoEVfNh6R56ITLgwW1IpciXLI-Yky5bR0n4W5HpVzco/edit?gid=0#gid=0
-
-Your expected columns are supported:
-
-- `date`
-- `time`
-- `timezone`
-- `submittedAt`
-
-## Final step required (important)
-
-A static website cannot append rows directly to a private Google Sheet URL.
-You still need a **Google Apps Script Web App URL** (`.../exec`) and paste it in `yes.html`.
-
-1. Open your target sheet.
-2. Go to **Extensions → Apps Script**.
-3. Paste:
+1. Create a Google Sheet (for example with columns: `date`, `time`, `timezone`, `submittedAt`).
+2. Open **Extensions → Apps Script** and paste this script:
 
 ```javascript
-const SHEET_ID = '1LoEVfNh6R56ITLgwW1IpciXLI-Yky5bR0n4W5HpVzco';
 const SHEET_NAME = 'Sheet1';
 
 function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   const payload = JSON.parse(e.postData.contents || '{}');
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
 
   sheet.appendRow([
     payload.date || '',
@@ -45,11 +29,9 @@ function doPost(e) {
 }
 ```
 
-4. Click **Deploy → New deployment → Web app**.
-5. Set:
+3. Deploy it as a Web App:
    - Execute as: **Me**
    - Who has access: **Anyone**
-6. Copy the Web App URL (ends with `/exec`).
-7. In `yes.html`, replace:
-   - `PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE`
-8. Redeploy your site.
+4. Copy the Web App URL.
+5. In `yes.html`, replace `PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE` with your Web App URL.
+6. Redeploy your static site.
